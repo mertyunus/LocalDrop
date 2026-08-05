@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LocalDrop - PC Kontrol Paneli</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f0f2f5;
+            margin: 0;
+            padding: 40px;
+            display: flex;
+            justify-content: center;
+        }
+        .container {
+            background-color: white;
+            padding: 40px;
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            max-width: 800px;
+            width: 100%;
+            display: flex;
+            gap: 40px;
+        }
+        .left-panel, .right-panel {
+            flex: 1;
+        }
+        .left-panel {
+            text-align: center;
+            border-right: 1px solid #eee;
+            padding-right: 40px;
+        }
+        h1 {
+            color: #1a73e8;
+            margin-top: 0;
+        }
+        p {
+            color: #5f6368;
+            line-height: 1.6;
+        }
+        .qr-container {
+            margin: 30px 0;
+            padding: 20px;
+            background: white;
+            border: 2px dashed #ccc;
+            border-radius: 8px;
+            display: inline-block;
+        }
+        .qr-container img {
+            max-width: 200px;
+            display: block;
+        }
+        .url-box {
+            background: #f8f9fa;
+            padding: 10px;
+            border-radius: 6px;
+            font-family: monospace;
+            font-size: 16px;
+            color: #333;
+            word-break: break-all;
+        }
+        .info-card {
+            background: #e8f0fe;
+            padding: 15px;
+            border-radius: 8px;
+            margin-top: 20px;
+            text-align: left;
+        }
+        h2 {
+            color: #202124;
+            font-size: 1.2rem;
+            border-bottom: 2px solid #1a73e8;
+            padding-bottom: 10px;
+            margin-bottom: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="left-panel">
+            <h1>LocalDrop <br> Kontrol Paneli</h1>
+            <p>Telefonunuzun kamerasını açın ve aşağıdaki QR kodu okutarak bağlanın.</p>
+            
+            <div class="qr-container">
+                <img id="qrImage" src="/api/qr" alt="QR">
+            </div>
+            
+            <p>Veya telefon tarayıcısına yazın:</p>
+            <div class="url-box" id="urlDisplay">Yükleniyor...</div>
+        </div>
+        
+        <div class="right-panel">
+            <h2>Gelen Dosyalar</h2>
+            <p>Gelen dosyalar projedeki Downloads klasörüne iner.</p>
+        </div>
+    </div>
+
+    <script>
+        fetch('/api/info')
+            .then(res => res.json())
+            .then(data => {
+                document.getElementById('urlDisplay').innerText = data.url;
+            })
+            .catch(err => {
+                document.getElementById('urlDisplay').innerText = "Bağlantı Hatası";
+            });
+    </script>
+</body>
+</html>

@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LocalDrop - Dosya Gönder</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f0f2f5;
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+        }
+        .container {
+            background-color: white;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            text-align: center;
+            width: 100%;
+            max-width: 400px;
+        }
+        h1 {
+            color: #1a73e8;
+            margin-bottom: 5px;
+        }
+        p {
+            color: #5f6368;
+            margin-bottom: 25px;
+        }
+        .file-input-wrapper {
+            position: relative;
+            overflow: hidden;
+            display: inline-block;
+            margin-bottom: 20px;
+        }
+        .btn {
+            border: none;
+            color: white;
+            background-color: #1a73e8;
+            padding: 12px 24px;
+            border-radius: 6px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: background-color 0.3s;
+            width: 100%;
+            box-sizing: border-box;
+        }
+        .btn:hover {
+            background-color: #1557b0;
+        }
+        .file-input-wrapper input[type=file] {
+            font-size: 100px;
+            position: absolute;
+            left: 0;
+            top: 0;
+            opacity: 0;
+            cursor: pointer;
+        }
+        #file-list {
+            text-align: left;
+            margin-bottom: 20px;
+            max-height: 150px;
+            overflow-y: auto;
+        }
+        .file-item {
+            background: #f8f9fa;
+            padding: 8px;
+            border-radius: 4px;
+            margin-bottom: 5px;
+            font-size: 14px;
+            word-break: break-all;
+        }
+        #status {
+            margin-top: 15px;
+            font-weight: bold;
+            color: #1a73e8;
+        }
+        .btn-upload {
+            background-color: #34a853;
+        }
+        .btn-upload:hover {
+            background-color: #2b803e;
+        }
+        .btn-upload:disabled {
+            background-color: #9aa0a6;
+            cursor: not-allowed;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>LocalDrop</h1>
+        <p>Bilgisayara dosya gönderin</p>
+
+        <div class="file-input-wrapper">
+            <button class="btn">Dosya Seç</button>
+            <input type="file" id="fileInput" multiple>
+        </div>
+
+        <div id="file-list"></div>
+
+        <button id="uploadBtn" class="btn btn-upload" disabled>Gönder</button>
+        <div id="status"></div>
+    </div>
+
+    <script>
+        const fileInput = document.getElementById('fileInput');
+        const fileList = document.getElementById('file-list');
+        const uploadBtn = document.getElementById('uploadBtn');
+        const statusDiv = document.getElementById('status');
+
+        let selectedFiles = [];
+
+        fileInput.addEventListener('change', (e) => {
+            selectedFiles = Array.from(e.target.files);
+            renderFileList();
+            uploadBtn.disabled = selectedFiles.length === 0;
+            statusDiv.textContent = '';
+        });
+
+        function renderFileList() {
+            fileList.innerHTML = '';
+            selectedFiles.forEach(file => {
+                const div = document.createElement('div');
+                div.className = 'file-item';
+                div.textContent = file.name + ' (' + (file.size / 1024).toFixed(1) + ' KB)';
+                fileList.appendChild(div);
+            });
+        }
+
+        uploadBtn.addEventListener('click', async () => {
+            if (selectedFiles.length === 0) return;
+
+            const formData = new FormData();
+            selectedFiles.forEach(file => {
+                formData.append('files', file);
+            });
+
+            statusDiv.textContent = 'Yükleniyor...';
+            uploadBtn.disabled = true;
+
+            try {
+                const response = await fetch('/api/upload', {
+                    method: 'POST',
+                    body: formData
+                });
+
+                if (response.ok) {
+                    statusDiv.textContent = 'Gitti!';
+                    statusDiv.style.color = '#34a853';
+                    selectedFiles = [];
+                    renderFileList();
+                    fileInput.value = '';
+                } else {
+                    statusDiv.textContent = 'Hata.';
+                    statusDiv.style.color = '#ea4335';
+                    uploadBtn.disabled = false;
+                }
+            } catch (error) {
+                statusDiv.textContent = 'Baglanti yok.';
+                statusDiv.style.color = '#ea4335';
+                uploadBtn.disabled = false;
+            }
+        });
+    </script>
+</body>
+</html>
